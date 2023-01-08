@@ -1,4 +1,4 @@
-    (c) Vladi Belperchinov-Shabanski "Cade"    <cade\@noxrun.com> <cade\@bis.bg>
+    (c) Vladi Belperchinov-Shabanski "Cade"    <cade@noxrun.com> <cade@bis.bg>
     Distributed under GNU GPLv2 license. http://cade.nuxron.com/projects/potp
 
     usage: $0 <options> <name>
