@@ -3,7 +3,7 @@
 ##
 ##  POTP perl-based OTP shell
 ##  2023 (c) Vladi Belperchinov-Shabanski "Cade"
-##  <cade@bis.bg> <cade@biscom.net> <cade@cpan.org>
+##  <cade@noxrun.com> <cade@bis.bg> <cade@cpan.org>
 ##
 ##  LICENSE: GPLv2
 ##
@@ -16,8 +16,12 @@ use Math::BigInt;
 use Digest::SHA1 qw(sha1);
 use Digest::HMAC qw(hmac);
 
+my $DATA_DIR = $ENV{ 'HOME' } . "/.potp";
+
 my $DEBUG;
 my $HELP = <<END_OF_HELP;
+(c) Vladi Belperchinov-Shabanski "Cade"    <cade\@noxrun.com> <cade\@bis.bg>
+Distributed under GNU GPLv2 license. http://cade.nuxron.com/projects/potp
 
 usage: $0 <options> <name>
 
@@ -33,11 +37,29 @@ options:
 
 name:
 
-    OTP entry (file) name to request for current OTP value
+  OTP entry (file) name to request for current OTP value
+
+default data directory in use:
+
+  $DATA_DIR
+
+example OTP entry file:
+
+  # begin OTP file
+  key=HFGFJDKSURHFKDFJGK
+  digits=6
+  period=30
+    
+note: period is in seconds
+
+supported file formats, searched for in the following order: 
+
+  1. GPG encrypted text               (*.txt.gpg)
+  2. GPG encrypted ASCII-armored text (*.txt.asc)
+  3. plaint text                      (*.txt)
 
 END_OF_HELP
 
-my $DATA_DIR = $ENV{ 'HOME' } . "/.potp";
 my $READLINE;
 my $opt_always_yes;
 my $opt_always_no;
@@ -96,6 +118,12 @@ while( @ARGV )
   push @args, $_;
   }
 
+if( @args == 0 and ! $opt_command )
+  {
+  print $HELP;
+  exit;
+  }
+
 dir_path_ensure( $DATA_DIR ) or die "fatal: cannot access data dir [$DATA_DIR]\n";
 chdir $DATA_DIR or die "fatal: cannot enter data dir [$DATA_DIR]\n";
 print STDERR "using data dir: [$DATA_DIR]\n" if $DEBUG;
@@ -112,8 +140,6 @@ else
   }  
 
 exit 0;
-#my $t = cmd_read_from( 'gpg', '-d', '-q', 'secret.txt.gpg' );
-#print $t;
 
 sub list_all_otp_names
 {
@@ -166,7 +192,7 @@ sub totp
 
 ##############################################################################
 
-# this is correct! RFC4226!
+# RFC4226!
 sub hotp
 {
     my ( $secret, $c, $digits ) = @_;
