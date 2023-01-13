@@ -153,8 +153,8 @@ sub show_otp
   my $name = shift;
   
   my $txt;
-  $txt = cmd_read_from( 'gpg', '-d', "$name.txt.gpg" ) if ! $txt and -e "$name.txt.gpg";
-  $txt = cmd_read_from( 'gpg', '-d', "$name.txt.asc" ) if ! $txt and -e "$name.txt.asc";
+  $txt = cmd_read_from( 'gpg', '-q', '-d', "$name.txt.gpg" ) if ! $txt and -e "$name.txt.gpg";
+  $txt = cmd_read_from( 'gpg', '-q', '-d', "$name.txt.asc" ) if ! $txt and -e "$name.txt.asc";
   $txt = file_load( "$name.txt" )                      if ! $txt and -e "$name.txt";
   
   my $hr = str2hash( $txt );
@@ -164,15 +164,17 @@ sub show_otp
   my $dig = $hr->{ 'digits' } || $hr->{ 'd'    } ||  6;
   my $per = $hr->{ 'period' } || $hr->{ 'p'    } || 30;
 
+  die "missing KEY in the config file [$name]\n" unless $key;
+
   my $bckey = MIME::Base32::decode( $key );
 
-  my $totp   = totp( $bckey );
+  my ( $totp, $tl )   = totp( $bckey );
   my $totp_s = $totp;
 
   $totp_s =~ s/(...)/$1 /g;
   
   print "\n";
-  print "$name -->  $totp  [ $totp_s]\n";
+  print "$name -->  $totp  [ $totp_s]  $tl seconds left\n";
   print "\n";
 }
 
@@ -180,13 +182,15 @@ sub show_otp
 
 sub totp
 {
-  my ( $secret, $digits, $tt ) = @_;
+  my ( $secret, $digits, $t0, $tp ) = @_;
 
-  my $X  = 30;
-  my $T0 = 0;
-  my $T  = int(( time() - $T0 ) / $X);
+  my $T0 = $t0 ||  0;
+  my $X  = $tp || 30;
+  my $T  = ( time() - $T0 ) / $X;
+  my $tl = $X - int( ( $T - int( $T ) ) * $X );
 
-  return hotp( $secret, $T, $digits );
+  my $otp = hotp( $secret, int( $T ), $digits );
+  return wantarray ? ( $otp, $tl ) : $otp;
 }
 
 
@@ -205,10 +209,11 @@ sub hotp
 
     $digits ||= 6;
 
-    die unless length $secret >= 16; # 128-bit minimum
-    die unless $digits >= 6 and $digits <= 10;
+    return undef unless length $secret >= 16; # 128-bit minimum
+    return undef unless $digits >= 6 and $digits <= 10;
 
-    ( my $hex = $c->as_hex ) =~ s/^0x(.*)/"0"x( 16 - length $1 ) . $1/e;
+    my $hex = $c->as_hex();
+    $hex =~ s/^0x(.*)/"0"x( 16 - length $1 ) . $1/e;
     my $bin = join '', map chr hex, $hex =~ /(..)/g; # pack 64-bit big endian
     my $hash = hmac $bin, $secret, \&sha1;
     my $offset = hex substr unpack("H*" => $hash), -1;
