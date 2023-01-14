@@ -1,21 +1,21 @@
 
 # SYNOPSIS
 
-  potp.pl <options> <name>
-  
-  alias pp=potp.pl
-  pp -l     # list all available data files
-  pp steam  # show OTP for data file "steam"
+    potp.pl <options> <name>
+    
+    alias pp=potp.pl
+    pp -l     # list all available data files
+    pp steam  # show OTP for data file "steam"
 
 # OPTIONS
 
-  -h       -- print help
-  -l       -- list available OTP entries
-  -d       -- increase debug level
-  -a dir   -- set data dir to hold resrei database (default is ~/.resrei)
-  -y       -- assume YES to all questions (disables -n)
-  -n       -- assume NO  to all questions (disables -y)
-  -q       -- suppress non-urgent messages
+    -h       -- print help
+    -l       -- list available OTP entries
+    -d       -- increase debug level
+    -a dir   -- set data dir to hold resrei database (default is ~/.resrei)
+    -y       -- assume YES to all questions (disables -n)
+    -n       -- assume NO  to all questions (disables -y)
+    -q       -- suppress non-urgent messages
 
 # OTP DATA FILE NAME
 
@@ -31,10 +31,10 @@ default data directory in use:
 
 example OTP entry file:
 
-  # begin OTP file
-  key=HFGFJDKSURHFKDFJGK
-  digits=6
-  period=30
+    # begin OTP file
+    key=HFGFJDKSURHFKDFJGK
+    digits=6
+    period=30
     
   notes: 
 
@@ -50,6 +50,6 @@ supported file formats, searched for in the following order:
 
 # AUTHOR & LICENSE
 
-  (c) Vladi Belperchinov-Shabanski "Cade"    <cade@noxrun.com> <cade@bis.bg>
-  Distributed under GNU GPLv2 license. http://cade.nuxron.com/projects/potp
+    (c) Vladi Belperchinov-Shabanski "Cade"    <cade@noxrun.com> <cade@bis.bg>
+    Distributed under GNU GPLv2 license. http://cade.nuxron.com/projects/potp
 
