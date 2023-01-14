@@ -50,7 +50,9 @@ example OTP entry file:
   digits=6
   period=30
     
-note: period is in seconds
+notes: 'key' is base64 encoded                
+       'digits' is optional and defaults to 6
+       'period' is in seconds, optional and defaults to 30
 
 supported file formats, searched for in the following order: 
 
@@ -156,6 +158,8 @@ sub show_otp
   $txt = cmd_read_from( 'gpg', '-q', '-d', "$name.txt.gpg" ) if ! $txt and -e "$name.txt.gpg";
   $txt = cmd_read_from( 'gpg', '-q', '-d', "$name.txt.asc" ) if ! $txt and -e "$name.txt.asc";
   $txt = file_load( "$name.txt" )                      if ! $txt and -e "$name.txt";
+
+  die "missing data file with name [$name]\n" unless $txt;
   
   my $hr = str2hash( $txt );
   print Dumper( $hr ) if $DEBUG;
@@ -164,7 +168,7 @@ sub show_otp
   my $dig = $hr->{ 'digits' } || $hr->{ 'd'    } ||  6;
   my $per = $hr->{ 'period' } || $hr->{ 'p'    } || 30;
 
-  die "missing KEY in the config file [$name]\n" unless $key;
+  die "missing KEY in the data file name [$name]\n" unless $key;
 
   my $bckey = MIME::Base32::decode( $key );
 
