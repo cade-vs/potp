@@ -172,6 +172,11 @@ sub show_otp
 
   my $bckey = MIME::Base32::decode( $key );
 
+  my $bckey_len = length( $bckey ) * 8;
+
+  print "WARNING: RFC4226 R4 requires 6+ digits value!\n" if $dig < 6 and ! $hr->{ 'ignore_r4' };
+  print "WARNING: RFC4226 R6 requires key length 128+ bits (got $bckey_len)!\n" if $bckey_len < 128 and ! $hr->{ 'ignore_r6' };
+
   my ( $totp, $tl )   = totp( $bckey );
   my $totp_s = $totp;
 
@@ -213,8 +218,11 @@ sub hotp
 
     $digits ||= 6;
 
-    return undef unless length $secret >= 16; # 128-bit minimum
-    return undef unless $digits >= 6 and $digits <= 10;
+# RFC4226 requirement R6 says secret must be at least 128 bits, better 160+
+#    return undef unless length $secret >= 16; # 128-bit minimum
+
+# RFC4226 requirement R4 says digits must be at least 6
+#    return undef unless $digits >= 6;
 
     my $hex = $c->as_hex();
     $hex =~ s/^0x(.*)/"0"x( 16 - length $1 ) . $1/e;
